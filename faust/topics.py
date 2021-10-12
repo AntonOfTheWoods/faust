@@ -463,9 +463,11 @@ class Topic(SerializedChannel, TopicT):
             res: RecordMetadata = fut.result()
         except Exception as exc:
             message.set_exception(exc)
-            if message.channel:
+            try:
                 topic_name = message.channel.get_topic_name()
-            else:
+            except Exception as ex:
+                logger.error("Error getting topic name")
+                logger.error(ex)
                 topic_name = "'Unknown'"
             logger.warning(
                 f"_on_published error for message topic "
@@ -473,7 +475,6 @@ class Topic(SerializedChannel, TopicT):
             )
             print()
             print(producer)
-
             print()
             self.app.sensors.on_send_error(producer, exc, state)
         else:
